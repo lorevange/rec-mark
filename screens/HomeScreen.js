@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Platform, TouchableOpacity, FlatList, Alert, ActivityIndicator } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useSelector, useDispatch } from 'react-redux';
@@ -9,6 +9,7 @@ import * as recActions from '../store/rec-actions';
 import ListRecording from '../components/ListRecording';
 import TimeObject from '../models/TimeObject';
 import { useState } from 'react';
+
 
 const HomeScreen = props => {
 
@@ -27,6 +28,7 @@ const HomeScreen = props => {
         loadState();
     }, [dispatch]);
 
+    //Asks for notification permissions if they are not granted
     useEffect(() => {
         Permissions.getAsync(Permissions.NOTIFICATIONS).then(statusObj => {
             if (statusObj.status !== 'granted') {
@@ -40,6 +42,7 @@ const HomeScreen = props => {
         });
     }, []);
 
+    //On swipe + delete press, deletes recording
     const deleteRecordingHandler = (id, audioUri) => {
         Alert.alert(
             "Delete Recording?",
@@ -55,6 +58,7 @@ const HomeScreen = props => {
             ]);
     };
 
+    //When recordings are being loaded, it shows a loading animation
     const loadingScreen = <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator color={Colors.primary} size='large' />
     </View>;
