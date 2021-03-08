@@ -2,9 +2,9 @@ import React from 'react';
 import { createAppContainer } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
 
-import HomeScreen from '../Screens/HomeScreen';
-import ListeningScreen from '../Screens/ListeningScreen';
-import RecordingScreen from '../Screens/RecordingScreen';
+import HomeScreen from '../screens/HomeScreen';
+import ListeningScreen from '../screens/ListeningScreen';
+import RecordingScreen from '../screens/RecordingScreen';
 import Colors from '../constants/Colors';
 
 const defaultStackNavOptions = {
