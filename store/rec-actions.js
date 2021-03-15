@@ -32,9 +32,9 @@ export const updateRecMarks = (id, flags) => {
         let flagsToString = '';
         for (const flag of flags) {
             if (flags.indexOf(flag) < flags.length - 1) {
-                flagsToString = flagsToString + flag.title + ":" + flag.timestamp.toString() + ";";
+                flagsToString = flagsToString + flag.title + "~" + flag.timestamp.toString() + "§";
             } else {
-                flagsToString = flagsToString + flag.title + ":" + flag.timestamp.toString();
+                flagsToString = flagsToString + flag.title + "~" + flag.timestamp.toString();
             }
         }
         try {
@@ -66,9 +66,9 @@ export const addRecording = (title, audioUri, date, duration, flags) => {
             let flagsToString = '';
             for (const flag of flags) {
                 if (flags.indexOf(flag) < flags.length - 1) {
-                    flagsToString = flagsToString + flag.title + ":" + flag.timestamp.toString() + ";";
+                    flagsToString = flagsToString + flag.title + "~" + flag.timestamp.toString() + "§";
                 } else {
-                    flagsToString = flagsToString + flag.title + ":" + flag.timestamp.toString();
+                    flagsToString = flagsToString + flag.title + "~" + flag.timestamp.toString();
                 }
             }
             const dbResult = await insertRecording(
@@ -119,9 +119,9 @@ export const loadRecordings = () => {
 
             for (let recording of recordings) {
                 if (recording.flags) {
-                    let flags = recording.flags.split(';');
+                    let flags = recording.flags.split('§');
                     for (let i = 0; i < flags.length; i++) {
-                        const titleAndTimeStamp = flags[i].split(':');
+                        const titleAndTimeStamp = flags[i].split('~');
                         flags[i] = new Flag(titleAndTimeStamp[0], Number(titleAndTimeStamp[1]));
                     }
                     recording.flags = flags;
