@@ -1,6 +1,10 @@
+import { Platform } from 'react-native';
+
 export default {
-    primary: '#D0253E', //'#e85d75',
+    primary: '#C82F04', //'#D0253E', //'#e85d75',
     grey: '#565254',
-    pink: "#FCD9DD",
-    list: "#f6f4f6"
+    dark: '#181E25', //"#FCD9DD",
+    list: "#ECECE9", // "#f6f4f6"
+    text: 'white',
+    listText: 'black'
 };
