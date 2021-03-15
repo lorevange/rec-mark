@@ -451,10 +451,10 @@ const ListeningScreen = props => {
             Alert.alert("Invalid Rec-Mark title", "Please enter a valid title", [{ text: 'Okay' }]);
             return;
         }
-        if (state.recMarkTitle.indexOf(':') !== -1 || state.recMarkTitle.indexOf(';') !== -1) {
+        if (state.recMarkTitle.indexOf('~') !== -1 || state.recMarkTitle.indexOf('§') !== -1) {
             Alert.alert(
                 "Invalid Rec-Mark title",
-                "These characters are not allowed:\ncolon : and semicolon ;",
+                "These characters are not allowed:\ntilde ~ and paragraph §",
                 [
                     { text: "Ok" }
                 ]);
