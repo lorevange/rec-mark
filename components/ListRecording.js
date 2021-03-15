@@ -36,7 +36,7 @@ const ListRecording = props => {
             <Swipeable renderRightActions={rightActions}>
                 <TouchableOpacity style={styles.recItem} activeOpacity={0.6} onPress={props.onSelect}>
                     <View style={styles.infoContainer}>
-                        <Text style={{ fontSize: 20 }}>{title}</Text>
+                        <Text style={{ fontSize: 20, color: Colors.listText }}>{title}</Text>
                         <Text style={{ color: Colors.grey }}>
                             {props.duration.hours ? props.duration.hours + ':' : ''}
                             {props.duration.minutes < 9 ? '0' + props.duration.minutes : props.duration.minutes}:

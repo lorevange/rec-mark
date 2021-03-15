@@ -1,9 +1,8 @@
 import React from 'react';
-import { View, Text, Modal, TextInput, Button, StyleSheet } from 'react-native';
+import { View, Text, Modal, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import Colors from '../constants/Colors';
-import { TouchableOpacity } from 'react-native-gesture-handler';
 
 const MyModal = props => {
     const recMarkPosition = props.recMarkPosition;
@@ -16,6 +15,12 @@ const MyModal = props => {
     >
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             <View style={styles.card}>
+                <TouchableOpacity
+                    style={{ width: '40%', flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'flex-end' }}
+                    onPress={props.onCloseModal}
+                >
+                    <Ionicons name="close" size={16} color={Colors.grey} />
+                </TouchableOpacity>
                 <Text style={{ color: Colors.primary }}>Rec-Mark</Text>
                 <View style={styles.inputContainer}>
                     <TextInput
@@ -23,6 +28,7 @@ const MyModal = props => {
                         value={props.titleValue}
                         onChangeText={props.onChangeText}
                         autoFocus
+                        selectTextOnFocus
                         keyboardType='default'
                         autoCorrect={false}
                         onSubmitEditing={props.onSubmitEditing}
@@ -33,8 +39,8 @@ const MyModal = props => {
                     {recMarkPosition.seconds < 10 ? '0' + recMarkPosition.seconds : recMarkPosition.seconds}.
                     {Math.floor(recMarkPosition.millis / 10) < 10 ? '0' + Math.floor(recMarkPosition.millis / 10) : Math.floor(recMarkPosition.millis / 10)}
                 </Text>
-                <TouchableOpacity style={{ marginTop: 5 }} onPress={props.onSubmitEditing} >
-                    <Text style={{ color: 'blue', fontSize: 20 }}>Save</Text>
+                <TouchableOpacity onPress={props.renaming ? props.onRename : props.onSubmitEditing} >
+                    <Text style={{ color: Colors.primary, fontSize: 18 }}>Save</Text>
                 </TouchableOpacity>
             </View>
         </View>
@@ -45,8 +51,8 @@ const styles = StyleSheet.create({
     card: {
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: "white",
-        padding: 20,
+        backgroundColor: '#F9DDDE',
+        padding: 10,
         borderRadius: 20,
         shadowColor: "#000",
         shadowOffset: {
@@ -68,12 +74,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     textInput: {
-        marginBottom: 20,
+        marginBottom: 15,
         borderBottomColor: '#ccc',
         borderBottomWidth: 1,
         fontSize: 14,
         textAlign: 'center',
-        width: '50%'
+        width: '40%'
     }
 });
 

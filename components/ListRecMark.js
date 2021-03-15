@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
+import { Ionicons } from '@expo/vector-icons';
 
 import Colors from '../constants/Colors';
 import TimeObject from '../models/TimeObject';
@@ -13,38 +14,59 @@ const ListRecMark = props => {
         Math.floor(props.duration / 1000) % 60,
         Math.floor(props.duration) % 1000);
     const title = props.title.length > 21 ? props.title.slice(0, 21) + "..." : props.title;
-    const RightActions = ({progress, dragX, onPress}) => {
+    const RightActions = ({ progress, dragX, onDelete, onRename }) => {
         const scale = dragX.interpolate({
             inputRange: [-100, 0],
             outputRange: [1, 0],
             extrapolate: 'clamp'
         });
         return (
-            <View style={{ alignItems: 'flex-end', backgroundColor: 'red' }}>
-                <TouchableOpacity
-                    style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
-                    onPress={onPress}
-                >
-                    <Animated.Text
-                        style={{
-                            color: 'white',
-                            paddingHorizontal: 20,
-                            fontWeight: '600',
-                            fontSize: 18,
-                            transform: [{ scale }]
-                        }}>
-                        Delete
+            <View style={{ alignItems: 'flex-end', flexDirection: 'row' }}>
+                <View style={{ backgroundColor: '#ccc' }}>
+                    <TouchableOpacity
+                        style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+                        onPress={onRename}
+                    >
+                        <Animated.View
+                            style={{
+                                paddingHorizontal: 20,
+                                transform: [{ scale }]
+                            }}>
+                            <Ionicons
+                                name={Platform.OS === 'android' ? 'md-pencil' : 'ios-pencil'}
+                                size={15}
+                                color={Colors.grey}
+                            />
+                        </Animated.View>
+                    </TouchableOpacity>
+                </View>
+                <View style={{ backgroundColor: 'red' }}>
+                    <TouchableOpacity
+                        style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+                        onPress={onDelete}
+                    >
+                        <Animated.Text
+                            style={{
+                                color: 'white',
+                                paddingHorizontal: 20,
+                                fontWeight: '600',
+                                fontSize: 18,
+                                transform: [{ scale }]
+                            }}>
+                            Delete
                     </Animated.Text>
-                </TouchableOpacity>
+                    </TouchableOpacity>
+                </View>
+
             </View>)
     }
 
     return (
         <View>
-            <Swipeable renderRightActions={(progress, dragX) => <RightActions progress={progress} dragX={dragX} onPress={props.onDelete}/>}>
+            <Swipeable renderRightActions={(progress, dragX) => <RightActions progress={progress} dragX={dragX} onDelete={props.onDelete} onRename={props.onRename} />}>
                 <TouchableOpacity style={styles.recItem} activeOpacity={0.6} onPress={props.onSelect} onLongPress={props.onLongPress}>
                     <View style={styles.infoContainer}>
-                        <Text style={{ fontSize: 16, paddingLeft: 10, textAlign: 'left' }} numberOfLines={2}>{title}</Text>
+                        <Text style={{ fontSize: 16, paddingLeft: 10, textAlign: 'left', color: Colors.listText }} numberOfLines={2}>{title}</Text>
                         <Text style={{ color: Colors.grey, paddingTop: 3 }}>
                             {timestamp.hours ? timestamp.hours + ':' : ''}
                             {timestamp.minutes < 10 ? '0' + timestamp.minutes : timestamp.minutes}:
