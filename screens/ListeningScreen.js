@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useReducer } from 'react';
-import { Text, View, StyleSheet, Platform, TouchableOpacity, Alert } from 'react-native';
-import { FlatList, TextInput } from 'react-native-gesture-handler';
-import { Ionicons } from '@expo/vector-icons';
+import { Text, View, StyleSheet, Platform, TouchableOpacity, Alert, FlatList, TextInput } from 'react-native';
+import { Ionicons, Entypo } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { Audio } from 'expo-av';
 import Slider from '@react-native-community/slider';
@@ -90,14 +89,16 @@ const reducer = (state, action) => {
                 ...state,
                 timeOfRecMark: action.timeOfRecMark,
                 recMarkPosition: action.recMarkPosition,
-                modalVisible: true
+                modalVisible: true,
+                recMarkTitle: "Rec-Mark " + (state.flags.length + 1)
             }
         case 'addRecMark':
             return {
                 ...state,
                 modalVisible: false,
                 recMarkTitle: '',
-                timeOfRecMark: null
+                timeOfRecMark: null,
+                renaming: false
             }
         case 'recMarkSelection':
             return {
@@ -108,6 +109,14 @@ const reducer = (state, action) => {
             return {
                 ...state,
                 rerender: !state.rerender
+            }
+        case 'renameRecMark':
+            return {
+                ...state,
+                modalVisible: true,
+                recMarkTitle: action.flag.title,
+                timeOfRecMark: action.flag.timestamp,
+                renaming: true
             }
         default:
             return state;
@@ -155,6 +164,7 @@ const ListeningScreen = props => {
         sound: null,                                    //instance in memory of the audio loaded with the help of the Audio library
         shouldPlay: false,                              //if set to true it means that the audio should play immediately after the action has completed
         modalVisible: false,                            //set to true opens the modal        
+        renaming: false,
         rerender: false
     }
 
@@ -303,7 +313,7 @@ const ListeningScreen = props => {
         //If a new recording is being saved or an existing one is being modified
         //Case it's modified
         if (state.rec) {
-            if (state.flags.toString() !== state.rec.flags.toString()) {
+            if (JSON.stringify(state.flags) !== JSON.stringify(state.rec.flags)) {
                 dispatch(recordingActions.updateRecMarks(state.rec.id, state.flags));
             }
             if (!(state.title === titleParam)) {
@@ -340,7 +350,7 @@ const ListeningScreen = props => {
             return;
         }
         //Case the recording existed and it has been modified 
-        if (state.title !== titleParam || state.flags.toString() !== state.rec.flags.toString()) {
+        if (state.title !== titleParam || JSON.stringify(state.flags) !== JSON.stringify(state.rec.flags)) {
             Alert.alert(
                 "Are you sure?",
                 "You're going back to the home screen without saving!",
@@ -496,13 +506,37 @@ const ListeningScreen = props => {
             (position.minutes < 10 ? '0' + position.minutes : position.minutes) + ':' +
             (position.seconds < 10 ? '0' + position.seconds : position.seconds) + '.' +
             (Math.floor(position.millis / 10) < 10 ? '0' + Math.floor(position.millis / 10) : Math.floor(position.millis / 10));
-        Alert.alert(flag.title, postring, [{ text: 'Done' }]);
+        Alert.alert(flag.title, postring, [{ text: 'Done' },
+        {
+            text: "Rename",
+            onPress: () => renameHandler(flag)
+        },
+        {
+            text: 'Delete',
+            style: 'destructive',
+            onPress: () => deleteRecMark(flag)
+        }]);
         return;
+    }
+
+    const renameHandler = flag => {
+        dispatchState({ type: 'renameRecMark', flag: flag });
+    }
+
+    const renameRecMark = () => {
+        const newFlag = new Flag(state.recMarkTitle, state.timeOfRecMark);
+        const index = state.flags.findIndex(flag => flag.timestamp === newFlag.timestamp);
+        state.flags.splice(index, 1, newFlag);
+        dispatchState({ type: 'addRecMark' });
+    }
+
+    const closeModalHandler = () => {
+        dispatchState({ type: 'addRecMark' });
     }
 
     return (
         <View style={styles.page} >
-            <View style={styles.details}>
+            <View style={styles.detailsIOS}>
                 <Text style={styles.title}>Title</Text>
                 <View style={styles.inputContainer}>
                     <TextInput
@@ -512,6 +546,7 @@ const ListeningScreen = props => {
                         onChangeText={titleChangeHandler}
                         keyboardType='default'
                         autoCorrect={false}
+                        placeholderTextColor={Colors.grey}
                     />
                     <Ionicons name={Platform.OS === 'android' ? "md-pencil" : "ios-pencil"} size={20} color={Colors.grey} />
                 </View>
@@ -527,6 +562,9 @@ const ListeningScreen = props => {
                 titleValue={state.recMarkTitle}
                 onChangeText={recMarkTitleChangeHandler}
                 onSubmitEditing={addRecMark}
+                onCloseModal={closeModalHandler}
+                renaming={state.renaming}
+                onRename={renameRecMark}
             />
             <FlatList
                 style={styles.flags}
@@ -539,6 +577,7 @@ const ListeningScreen = props => {
                         onSelect={() => { recMarkSelection(itemData.item.timestamp) }}
                         onDelete={() => { deleteRecMark(itemData.item) }}
                         onLongPress={() => { detailShow(itemData.item) }}
+                        onRename={() => { renameHandler(itemData.item) }}
                     />
                 }}
             />
@@ -547,19 +586,19 @@ const ListeningScreen = props => {
                     style={styles.slider}
                     minimumValue={0}
                     maximumValue={durationMillis}
-                    minimumTrackTintColor={Platform.OS === 'android' ? 'white' : Colors.primary}
-                    maximumTrackTintColor={Platform.OS === 'android' ? 'black' : ''}
+                    minimumTrackTintColor={Colors.primary}
+                    maximumTrackTintColor={Colors.grey}
                     value={state.positionMillis}
                     onValueChange={seekSliderHandler}
                     onSlidingComplete={finishedSeeking}
                 />
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '85%' }}>
-                    <Text>
+                    <Text style={{ color: Colors.text }}>
                         {state.position.hours ? state.position.hours + ':' : ''}
                         {state.position.minutes < 10 ? '0' + state.position.minutes : state.position.minutes}:
                         {state.position.seconds < 10 ? '0' + state.position.seconds : state.position.seconds}
                     </Text>
-                    <Text>
+                    <Text style={{ color: Colors.text }}>
                         -{state.countDown.hours ? state.countDown.hours + ':' : ''}
                         {state.countDown.minutes < 10 ? '0' + state.countDown.minutes : state.countDown.minutes}:
                         {state.countDown.seconds < 10 ? '0' + state.countDown.seconds : state.countDown.seconds}
@@ -568,21 +607,21 @@ const ListeningScreen = props => {
                 {state.playing ? (
                     <View style={styles.pauseStop}>
                         <TouchableOpacity activeOpacity={0.6} onPress={pausePlaying}>
-                            <Ionicons name={Platform.OS === 'android' ? "md-pause-circle-outline" : "ios-pause-circle-outline"} size={50} color={Platform.OS === 'android' ? 'white' : Colors.primary} />
+                            <Ionicons name={Platform.OS === 'android' ? "md-pause-circle-outline" : "ios-pause-circle-outline"} size={50} color={Colors.primary} />
                         </TouchableOpacity>
-                        <TouchableOpacity activeOpacity={0.6} onPress={openModal}>
-                            <Ionicons name={Platform.OS === 'android' ? "md-flag" : "ios-flag"} size={70} color={Platform.OS === 'android' ? 'white' : Colors.primary} />
+                        <TouchableOpacity style={{ paddingBottom: 5 }} activeOpacity={0.6} onPress={openModal}>
+                            <Entypo name="flag" size={70} color={Colors.primary} />
                         </TouchableOpacity>
                         <TouchableOpacity activeOpacity={0.6} onPress={stopPlaying}>
-                            <Ionicons name={Platform.OS === 'android' ? "md-stop-circle-outline" : "ios-stop-circle-outline"} size={50} color={Platform.OS === 'android' ? 'white' : Colors.primary} />
+                            <Ionicons name={Platform.OS === 'android' ? "md-stop-circle-outline" : "ios-stop-circle-outline"} size={50} color={Colors.primary} />
                         </TouchableOpacity>
                     </View>) :
                     <View style={styles.playFlag}>
                         <TouchableOpacity activeOpacity={0.6} onPress={playRecording}>
-                            <Ionicons name={Platform.OS === 'android' ? 'md-play-circle-outline' : 'ios-play-circle-outline'} size={75} color={Platform.OS === 'android' ? 'white' : Colors.primary} />
+                            <Ionicons name={Platform.OS === 'android' ? 'md-play-circle-outline' : 'ios-play-circle-outline'} size={75} color={Colors.primary} />
                         </TouchableOpacity>
                         <TouchableOpacity activeOpacity={0.6} onPress={openModal}>
-                            <Ionicons name={Platform.OS === 'android' ? "md-flag" : "ios-flag"} size={70} color={Platform.OS === 'android' ? 'white' : Colors.primary} />
+                            <Entypo name="flag" size={70} color={Colors.primary} />
                         </TouchableOpacity>
                     </View>
                 }
@@ -600,10 +639,11 @@ ListeningScreen.navigationOptions = navData => {
     return {
         headerTitle: title ? title : 'Add New Recording',
         headerTitleStyle: {
-            alignSelf: 'center'
+            alignSelf: 'center',
+            color: Colors.primary
         },
         headerStyle: {
-            backgroundColor: Platform.OS === 'android' ? Colors.primary : Colors.pink,
+            backgroundColor: Colors.dark,
             shadowColor: 'transparent'
         },
         headerRight: () => {
@@ -630,24 +670,25 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.list
     },
     headerButtonText: {
-        color: Platform.OS === 'android' ? 'white' : Colors.primary,
+        color: Colors.primary,
         fontSize: 18
     },
     headerButton: {
         marginHorizontal: 20
     },
     title: {
-        fontSize: 22
+        fontSize: 22,
+        color: Colors.text
     },
-    details: {
+    detailsIOS: {
         justifyContent: 'space-between',
         height: '20%',
-        backgroundColor: Colors.pink,
+        backgroundColor: Colors.dark,
         borderBottomLeftRadius: 10,
         borderBottomRightRadius: 10,
         padding: 10,
         alignItems: "center",
-        shadowColor: "#000",
+        shadowColor: '#000',
         shadowOffset: {
             width: 0,
             height: 2
@@ -662,7 +703,8 @@ const styles = StyleSheet.create({
         borderBottomColor: '#ccc',
         borderBottomWidth: 1,
         fontSize: 18,
-        width: '90%'
+        width: '90%',
+        color: Colors.text
     },
     deleteContainer: {
         paddingRight: 30
@@ -683,7 +725,7 @@ const styles = StyleSheet.create({
         height: '25%',
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: Platform.OS === 'android' ? Colors.primary : Colors.pink,
+        backgroundColor: Colors.dark,
         shadowColor: "#000",
         shadowOffset: {
             width: 0,
