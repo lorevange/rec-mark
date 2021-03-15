@@ -126,13 +126,16 @@ const HomeScreen = props => {
 
 HomeScreen.navigationOptions = {
     headerTitle: 'Your recordings',
-    headerTitleStyle: {
-        alignSelf: 'center',
-        color: Colors.primary
-    },
     headerStyle: {
         backgroundColor: Colors.dark,
-        shadowColor: "transparent"
+        elevation: 5,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4
     }
 }
 

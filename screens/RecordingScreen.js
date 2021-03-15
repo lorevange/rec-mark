@@ -423,13 +423,10 @@ RecordingScreen.navigationOptions = navData => {
     const homeFunction = navData.navigation.getParam('toHomeScreen');
     return {
         headerTitle: 'New Recording',
-        headerTitleStyle: {
-            alignSelf: 'center',
-            color: Colors.primary
-        },
         headerStyle: {
             backgroundColor: Colors.dark,
-            shadowColor: 'transparent'
+            shadowColor: 'transparent',
+            elevation: 0
         },
         headerLeft: () => {
             return (

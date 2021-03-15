@@ -638,13 +638,10 @@ ListeningScreen.navigationOptions = navData => {
     const homeScreenFunction = navData.navigation.getParam('toHomeScreen');
     return {
         headerTitle: title ? title : 'Add New Recording',
-        headerTitleStyle: {
-            alignSelf: 'center',
-            color: Colors.primary
-        },
         headerStyle: {
             backgroundColor: Colors.dark,
-            shadowColor: 'transparent'
+            shadowColor: 'transparent',
+            elevation: 0
         },
         headerRight: () => {
             return (
