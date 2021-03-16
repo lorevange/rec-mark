@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Platform, TouchableOpacity, FlatList, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, Alert, ActivityIndicator } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useSelector, useDispatch } from 'react-redux';
 import * as Permissions from 'expo-permissions';
@@ -115,9 +115,9 @@ const HomeScreen = props => {
             </View>
             <View style={styles.recButtonContainer}>
                 <TouchableOpacity style={styles.recButton} activeOpacity={0.6} onPress={() => props.navigation.navigate('Recording')}>
-                    <Text style={styles.newRecording}>NEW</Text>
-                    <FontAwesome name="microphone" size={30} color={Colors.primary} />
-                    <Text style={styles.newRecording}>REC</Text>
+                    <View style={styles.buttonContainer}>
+                        <FontAwesome name="microphone" size={30} color={Colors.primary} style={styles.button} />
+                    </View>
                 </TouchableOpacity>
             </View>
         </View >
@@ -173,6 +173,32 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-around'
+    },
+    buttonContainer: {
+        width: '100%',
+        alignItems: 'center',
+        borderColor: Colors.primary,
+        borderWidth: 4,
+        borderRadius: 20,
+        padding: 10,
+        shadowColor: "#ccc",
+        shadowOffset: {
+            width: 0,
+            height: 1
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5
+    },
+    button: {
+        shadowColor: "#ccc",
+        shadowOffset: {
+            width: 0,
+            height: 1
+        },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+        elevation: 2
     }
 });
 

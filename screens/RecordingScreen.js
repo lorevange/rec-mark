@@ -97,7 +97,7 @@ const RecordingScreen = props => {
         time: new TimeObject(0, 0, 0, 0),               //timeObject to show timer on screen
         baseTime: null,                                 //time when recording starts
         points: '',                                     //Recording...
-        isRecording: false,                             //set to true when recording starts
+        isRecording: true,                             //set to true when recording starts
         paused: false,                                  //on Android version <= 24 always false
         starting: false,                                //when starting recording set to true
         flags: [],                                      //list of rec-marks set while recording
@@ -106,6 +106,12 @@ const RecordingScreen = props => {
         recMarkPosition: new TimeObject(0, 0, 0, 0),    //position of recmark in timeObject
         modalVisible: false                             //opens modal if set to true, false to close it
     }
+
+    Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+        staysActiveInBackground: true
+    });
 
     //Setup of the reducer, dispatchState(action) with action = {type, params} will be used
     const [state, dispatchState] = useReducer(reducer, initialState);
@@ -125,6 +131,17 @@ const RecordingScreen = props => {
             toHomeScreen: toHomeScreenHandler,
         })
     }, [toHomeScreenHandler, state.recording]);
+
+    //Sets up the listener so whenever the screen is loaded, so that on focus the recording will start
+    useEffect(() => {
+        const willFocusSub = props.navigation.addListener('willFocus', startRecording);
+        return () => { willFocusSub.remove(); }
+    }, [startRecording]);
+
+    //Runs the function startRecording when the screen is mounted
+    useEffect(() => {
+        startRecording();
+    }, [startRecording])
 
     //The helper function to run useInterval every second
     const getTime = () => {
@@ -326,9 +343,14 @@ const RecordingScreen = props => {
     }
 
     let recButton = <View style={styles.flagContainer} >
-        <TouchableOpacity activeOpacity={0.6} onPress={startRecording}>
-            <FontAwesome name="microphone" size={60} color={Colors.primary} />
-        </TouchableOpacity>
+        <View style={styles.recSave}>
+            <TouchableOpacity activeOpacity={0.6} onPress={startRecording}>
+                <FontAwesome name="microphone" size={60} color={Colors.primary} />
+            </TouchableOpacity>
+            <TouchableOpacity activeOpacity={0.6} onPress={stopRecording}>
+                <Ionicons name={Platform.OS === 'android' ? 'md-save' : 'ios-save'} size={50} color={Colors.primary} />
+            </TouchableOpacity>
+        </View>
     </View>;
 
     let flagButtons = (
@@ -345,19 +367,6 @@ const RecordingScreen = props => {
                 </TouchableOpacity>
             </View>
         </View>)
-
-    if (state.recording && state.starting) {
-        recButton = <View style={styles.flagContainer} >
-            <View style={styles.recSave}>
-                <TouchableOpacity activeOpacity={0.6} onPress={startRecording}>
-                    <FontAwesome name="microphone" size={60} color={Colors.primary} />
-                </TouchableOpacity>
-                <TouchableOpacity activeOpacity={0.6} onPress={stopRecording}>
-                    <Ionicons name={Platform.OS === 'android' ? 'md-save' : 'ios-save'} size={50} color={Colors.primary} />
-                </TouchableOpacity>
-            </View>
-        </View>
-    }
 
     if (Platform.OS === 'android' && Device.platformApiLevel <= 24) {
         flagButtons = (
@@ -385,8 +394,7 @@ const RecordingScreen = props => {
                 </View>
                 <View style={{ paddingVertical: 20 }}>
                     <Text style={{ color: Colors.text }}>
-                        {state.isRecording ? 'Recording' + state.points :
-                            'Start recording!'}
+                        {'Recording' + state.points}
                     </Text>
                 </View>
             </View>

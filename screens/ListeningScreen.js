@@ -130,7 +130,8 @@ const ListeningScreen = props => {
     //Also it plays in silent mode on IOS, which would otherwise not happen 
     Audio.setAudioModeAsync({
         allowsRecordingIOS: false,
-        playsInSilentModeIOS: true
+        playsInSilentModeIOS: true,
+        staysActiveInBackground: true
     });
 
     //Looks for the recording in the state. Allows to know if the user is coming from the home screen or the recording screen.
